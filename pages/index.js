@@ -1,24 +1,44 @@
 import Seo from "../components/Seo";
 import {useEffect, useState} from "react";
+import Link from "next/link";
+import {useRouter} from "next/router";
 
-export default function Home() {
-    const [movies, setMovies] = useState();
-    useEffect(() => {
-        (async () => {
-            const { results } = await (
-                await fetch(`/api/movies`)
-            ).json();
-            setMovies(results);
-        })();
-    }, []);
+export default function Home({results}) {
+    const router = useRouter();
+    const onClick = (id, title)=> {
+        router.push(
+            {
+                pathname: `/movies/${id}`, //path를 바꿔주고
+                query: {
+                    title, //url에서 쿼리를 추가해준다.
+                },
+            },
+            `/movies/${id}` //쿼리를 path와 똑같이 해주어서 마스킹해준다.
+        );
+    }
     return (
         <div className="container">
             <Seo title="Home" />
-            {!movies && <h4>Loading...</h4>}
-            {movies?.map((movie) => (
-                <div className="movie" key={movie.id}>
-                    <img src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} />
-                    <h4>{movie.original_title}</h4>
+            {results?.map((movie) => (
+                <div
+                    onClick={() => onClick(movie.id, movie.original_title)}
+                    className="movie"
+                    key={movie.id}
+                >
+                    <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} />
+                    <h4>
+                        <Link legacyBehavior
+                            href={{
+                                pathname: `/movies/${movie.id}`,
+                                query: {
+                                    title: movie.original_title,
+                                },
+                            }}
+                            as={`/movies/${movie.id}`}
+                        >{/* onClick에서 router.push 해준 것 처럼 동일하게 적용시켜줘야 한다. */}
+                            <a>{movie.original_title}</a>
+                        </Link>
+                    </h4>
                 </div>
             ))}
             <style jsx>{`
@@ -44,4 +64,15 @@ export default function Home() {
       `}</style>
         </div>
     );
+}
+
+export async function getServerSideProps(){
+    const { results } = await (await fetch(`http://localhost:3000//api/movies`)).json();
+    return {
+        props:{
+            results,
+        },
+    }
+    /*getServerSideProps 에서 리턴하는 것은 모두 컴포넌트에서 props로 받아올 수 있다.
+    * 위에 Home 컴포넌트에서 props로 results를 가져왔다.*/
 }
