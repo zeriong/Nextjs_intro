@@ -6,15 +6,7 @@ import {useRouter} from "next/router";
 export default function Home({results}) {
     const router = useRouter();
     const onClick = (id, title)=> {
-        router.push(
-            {
-                pathname: `/movies/${id}`, //path를 바꿔주고
-                query: {
-                    title, //url에서 쿼리를 추가해준다.
-                },
-            },
-            `/movies/${id}` //쿼리를 path와 똑같이 해주어서 마스킹해준다.
-        );
+        router.push(`/movies/${title}/${id}`);
     }
     return (
         <div className="container">
@@ -27,15 +19,7 @@ export default function Home({results}) {
                 >
                     <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} />
                     <h4>
-                        <Link legacyBehavior
-                            href={{
-                                pathname: `/movies/${movie.id}`,
-                                query: {
-                                    title: movie.original_title,
-                                },
-                            }}
-                            as={`/movies/${movie.id}`}
-                        >{/* onClick에서 router.push 해준 것 처럼 동일하게 적용시켜줘야 한다. */}
+                        <Link legacyBehavior href={`/movies/${movie.original_title}/${movie.id}`}>
                             <a>{movie.original_title}</a>
                         </Link>
                     </h4>
